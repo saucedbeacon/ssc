@@ -3,13 +3,28 @@ import time
 from datetime import datetime
 import telebot
 
+
 bot = telebot.TeleBot("6957326767:AAGiZdU1oAv8kmKkyYe-3V30lN4-XyoBalU", parse_mode=None)
 tries = []
+headersbird = {
+  'authority': 'multichain-api.birdeye.so',
+  'accept': 'application/json, text/plain, */*',
+  'accept-language': 'en-US,en;q=0.9',
+  'agent-id': 'e34f88be-bb56-4067-914a-da13328da441',
+  'origin': 'https://birdeye.so',
+  'referer': 'https://birdeye.so/',
+  'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+  'sec-ch-ua-mobile': '?0',
+  'sec-ch-ua-platform': '"Windows"',
+  'sec-fetch-dest': 'empty',
+  'sec-fetch-mode': 'cors',
+  'sec-fetch-site': 'same-site',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+}
 headers = {
   'authority': 'api.solscan.io',
   'accept': 'application/json',
   'accept-language': 'en-US,en;q=0.9',
-  'if-none-match': 'W/"1bcf-HaL4Qv7RM97xd6iPTHffMiOgD8c"',
   'origin': 'https://solscan.io',
   'referer': 'https://solscan.io/',
   'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
@@ -63,7 +78,9 @@ Transaction Hash : `{i['txHash']}`
                                 while True:
                                     try:
                                         txnInfo = requests.get('https://api.solscan.io/v2/transaction?tx='+txHash, headers=headers).json()
-                                        for k in list(txnInfo['data']['parsedInstruction']):
+                                        m = txnInfo['data']['parsedInstruction']
+                                        print(m)
+                                        for k in m:
                                             if k['type'] == 'purchase':
                                                 currentTime = datetime.fromtimestamp(txnInfo["data"]["blockTime"], tz=None)
                                                 tokenQuote = k['params']['userIdoInfo']
@@ -79,6 +96,8 @@ Transaction Hash : `{i['txHash']}`
                                                 except:
                                                     tokenQuoteIcon = None
                                                 tokenQuoteName = tokenQuoteInfo['data']['name']
+                                                tokenMeta = requests.get("https://multichain-api.birdeye.so/solana/token/meta?token="+tokenQuote, headers=headersbird).json()
+                                                tokenSocials = f"{str(tokenMeta['data']['twitter'])} - {str(tokenMeta['data']['discord'])} - {str(tokenMeta['data']['telegram'])}"
                                                 birdEyeLink = "https://birdeye.so/token/"+tokenQuote
                                                 bonkBotLink = 'https://t.me/neo_bonkbot?start=ref_m8gai_ca_'+tokenQuote
                                                 if baseQuote == 'So11111111111111111111111111111111111111112':
@@ -98,6 +117,7 @@ Token Address : `{tokenQuote}`
 Pair : {tokenQuoteSymbol} - {baseQuoteName}
 Block Time : {currentTime}
 Message Time : {datetime.fromtimestamp(time.time(), tz=None)}
+Socials : {tokenSocials}
 
 Powered by Retina
 """
@@ -107,10 +127,10 @@ Powered by Retina
                                                     bot.send_message(-1002110518878, constructStr, parse_mode='markdown', reply_markup=keyboard)
                                                 print(txHash, tokenQuote, baseQuote)
                                         break
-                                    except:
+                                    except Exception as e:
                                         tries.append('')
                                         print(e)
-                                        print("OP Exception")
+                                        print("Ray Exception")
                                         if len(tries) > 50:
                                             tries.clear()
                                             break
@@ -135,7 +155,9 @@ Transaction Hash : `{i['txHash']}`
                                 while True:
                                     try:
                                         txnInfo = requests.get('https://api.solscan.io/v2/transaction?tx='+txHash, headers=headers).json()
-                                        for k in txnInfo['data']['parsedInstruction']:
+                                        m = txnInfo['data']['parsedInstruction']
+                                        print(m)
+                                        for k in m:
                                             if k['type'] == 'initializeMarket':
                                                 currentTime = datetime.fromtimestamp(txnInfo["data"]["blockTime"], tz=None)
                                                 baseQuote = k['params']['quoteMint']
@@ -151,6 +173,8 @@ Transaction Hash : `{i['txHash']}`
                                                 except:
                                                     tokenQuoteIcon = None
                                                 tokenQuoteName = tokenQuoteInfo['data']['name']
+                                                tokenMeta = requests.get("https://multichain-api.birdeye.so/solana/token/meta?token="+tokenQuote, headers=headersbird).json()
+                                                tokenSocials = f"{str(tokenMeta['data']['twitter'])} - {str(tokenMeta['data']['discord'])} - {str(tokenMeta['data']['telegram'])}"
                                                 birdEyeLink = "https://birdeye.so/token/"+tokenQuote
                                                 bonkBotLink = 'https://t.me/neo_bonkbot?start=ref_m8gai_ca_'+tokenQuote
                                                 if baseQuote == 'So11111111111111111111111111111111111111112':
@@ -170,6 +194,7 @@ Token Address : `{tokenQuote}`
 Pair : {tokenQuoteSymbol} - {baseQuoteName}
 Block Time : {currentTime}
 Message Time : {datetime.fromtimestamp(time.time(), tz=None)}
+Socials : {tokenSocials}
 
 Powered by Retina
 """
@@ -187,5 +212,6 @@ Powered by Retina
                                             tries.clear()
                                             break
                                         continue
-    except:
+    except Exception as e:
+        print(e)
         continue
